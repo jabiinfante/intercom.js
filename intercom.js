@@ -129,9 +129,19 @@ var Intercom = (function() {
 		this.receivedIDs    = {};
 		this.previousValues = {};
 	
-		var storageHandler = function() { self._onStorageEvent.apply(self, arguments); };
+		var FAKE_EV_TIMEOUT = 100;
+		var FakeEventInterval = function() {
+		    self._onStorageEvent.apply(self);
+		    setTimeout(FakeEventInterval,FAKE_EV_TIMEOUT);
+		};
+		FakeEventInterval();
+		
+		var storageHandler = function() { FakeEventInterval = null; self._onStorageEvent.apply(self, arguments); };
 		if (window.attachEvent) { document.attachEvent('onstorage', storageHandler); }
 		else { window.addEventListener('storage', storageHandler, false); };
+		
+		
+	
 	};
 	
 	Intercom.prototype._transaction = function(fn) {
@@ -331,6 +341,7 @@ var Intercom = (function() {
 	var INDEX_EMIT = 'intercom';
 	var INDEX_ONCE = 'intercom_once';
 	var INDEX_LOCK = 'intercom_lock';
+	var INDEX_FAKE = 'intercom_fake';
 	
 	var THRESHOLD_TTL_EMIT = 50000;
 	var THRESHOLD_TTL_ONCE = 1000 * 3600;
